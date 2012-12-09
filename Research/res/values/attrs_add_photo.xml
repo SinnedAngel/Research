@@ -5,6 +5,7 @@
         <attr name="itemSize" format="dimension" />
         <attr name="maxColumns" format="integer" />
         <attr name="picturePath" format="string" />
+        <attr name="maxItemCount" format="integer" />
     </declare-styleable>
 
 </resources>

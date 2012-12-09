@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textView1"
+            style="@style/CreateAdsText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tv_create_ads_promopoint_1"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <TextView
+            android:id="@+id/tv_create_ads_promopoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@android:color/holo_blue_light" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#808080" />
+
+    <TextView
+        android:id="@+id/textView2"
+        style="@style/CreateAdsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/tv_create_ads_promopoint_2"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="13sp" />
+
+    <Switch
+        android:id="@+id/sw_create_ads_promopoint_toplisting"
+        style="@style/CreateAdsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/tv_create_ads_promopoint_toplisting" />
+
+    <Switch
+        android:id="@+id/sw_create_ads_promopoint_yellowbackground"
+        style="@style/CreateAdsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/tv_create_ads_promopoint_yellowbackground" />
+
+    <Switch
+        android:id="@+id/sw_create_ads_promopoint_boldtitle"
+        style="@style/CreateAdsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/tv_create_ads_promopoint_boldtitle" />
+
+    <Switch
+        android:id="@+id/sw_create_ads_promopoint_hotitems"
+        style="@style/CreateAdsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/tv_create_ads_promopoint_hotitems" />
+
+    <Switch
+        android:id="@+id/sw_create_ads_promopoint_websitelink"
+        style="@style/CreateAdsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/tv_create_ads_promopoint_websitelink" />
+
+    <EditText
+        android:id="@+id/et_create_ads_promopoint_website_address"
+        style="@style/CreateAdsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="@string/et_create_ads_promopoint_website_address"
+        android:textAppearance="?android:attr/textAppearanceSmallInverse" >
+
+        <requestFocus />
+    </EditText>
+
+    <CheckBox
+        android:id="@+id/cb_create_ads_promopoint_agreement"
+        style="@style/CreateAdsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/cb_create_ads_promopoint_agreement"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="10sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/btn_create_ads_promopoint_back"
+            style="@style/ButtonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:background="@drawable/button_state"
+            android:text="@string/btn_create_ads_promopoint_back" />
+
+        <Button
+            android:id="@+id/btn_create_ads_promopoint_continue"
+            style="@style/ButtonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_state"
+            android:text="@string/btn_create_ads_promopoint_continue" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -47,19 +47,22 @@ public class AddPhotoFragment extends Fragment
 	private int mPadding = 5;
 	private int mHalfPadding = 2;
 
+	private int mChangeIndex = -1;
+
+	private Uri mImageCaptureUri;
+
 	private int mMaxColumns = 3;
+	private int mMaxItemCount = 0;
 
 	private boolean mIsUseSize = false;
+
+	private String mPicturePath;
 
 	private static final int ACTION_CAMERA = 1;
 	private static final int ACTION_GALLERY = 2;
 
 	private ArrayList<String> mUriList = new ArrayList<String>();
 	private ArrayList<PictureItem> mImageList = new ArrayList<PictureItem>();
-
-	private String mPicturePath;
-
-	private Uri mImageCaptureUri;
 
 	public PictureItem[] getImageList()
 	{
@@ -84,6 +87,26 @@ public class AddPhotoFragment extends Fragment
 	{
 		mItemSize = size;
 		mIsUseSize = true;
+	}
+
+	public void setMaxItemCount(int maxItemCount)
+	{
+		this.mMaxItemCount = maxItemCount;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		super.onActivityCreated(savedInstanceState);
+
+		if (savedInstanceState != null)
+		{
+			String[] uriList = savedInstanceState.getStringArray("IMAGES");
+			if (uriList != null)
+			{
+				addImages(uriList);
+			}
+		}
 	}
 
 	@Override
@@ -123,6 +146,7 @@ public class AddPhotoFragment extends Fragment
 			@Override
 			public void onClick(View v)
 			{
+				mChangeIndex = -1;
 				showPictureSelection();
 			}
 		});
@@ -184,8 +208,72 @@ public class AddPhotoFragment extends Fragment
 		mItemSize = (int) a.getDimension(R.styleable.AddPhotoView_itemSize, 80);
 		mMaxColumns = a.getInteger(R.styleable.AddPhotoView_maxColumns, 3);
 		mPicturePath = a.getString(R.styleable.AddPhotoView_picturePath);
+		mMaxItemCount = a.getInteger(R.styleable.AddPhotoView_maxItemCount, 0);
 
 		a.recycle();
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+
+		String[] uriList = getUriList();
+
+		outState.putStringArray("IMAGES", uriList);
+	}
+
+	@Override
+	public void onDestroyView()
+	{
+		if (mImageList != null)
+		{
+			for (PictureItem item : mImageList)
+			{
+				if (item.imageView != null)
+					item.imageView.setImageBitmap(null);
+
+				if (item.image != null)
+				{
+					item.image.recycle();
+					item.image = null;
+				}
+			}
+		}
+
+		super.onDestroyView();
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == ACTION_CAMERA)
+		{
+			if (resultCode == Activity.RESULT_OK)
+			{
+				Uri uri = mImageCaptureUri;
+				if (mChangeIndex == -1)
+					addImage(uri);
+				else
+					changeImage(mChangeIndex, uri);
+			}
+		}
+		if (requestCode == ACTION_GALLERY)
+		{
+			if (resultCode == Activity.RESULT_OK)
+			{
+				if (data != null)
+				{
+					Uri uri = data.getData();
+					if (mChangeIndex == -1)
+						addImage(uri);
+					else
+						changeImage(mChangeIndex, uri);
+				}
+			}
+		}
 	}
 
 	private void addImage(Uri uri)
@@ -211,16 +299,35 @@ public class AddPhotoFragment extends Fragment
 
 			mImageList.add(item);
 
+			int itemCount = mImageList.size();
+
 			ImageView imageView = new ImageView(context);
 			imageView.setImageBitmap(bitmap);
 			imageView.setBackgroundResource(R.drawable.upload_foto_bg);
 			imageView.setLayoutParams(mItemParams);
+			imageView.setTag(itemCount - 1);
+			imageView.setOnClickListener(new ImageView.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					Object tag = v.getTag();
+					if (tag instanceof Integer)
+					{
+						mChangeIndex = (Integer) tag;
+						showPictureSelection();
+					}
+				}
+			});
+			item.imageView = imageView;
 
 			int count = mCurrentContainer.getChildCount();
 			if (count > 0)
 				mCurrentContainer.addView(imageView, count - 1);
 
-			if (count + 1 > mMaxColumns)
+			if (mMaxItemCount > 0 && itemCount >= mMaxItemCount)
+				mButtonAddPhoto.setVisibility(View.GONE);
+			else if (count + 1 > mMaxColumns)
 			{
 				mCurrentContainer.removeView(mButtonAddPhoto);
 
@@ -242,14 +349,71 @@ public class AddPhotoFragment extends Fragment
 		}
 		finally
 		{
-			// try
-			// {
-			// if (inputStream != null)
-			// inputStream.close();
-			// }
-			// catch (IOException e)
-			// {
-			// }
+			try
+			{
+				if (inputStream != null)
+					inputStream.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
+	}
+
+	private void changeImage(int index, Uri uri)
+	{
+		if (uri == null)
+			return;
+
+		if (mImageList.size() > index)
+		{
+			PictureItem item = mImageList.get(index);
+
+			if (item.imageView != null)
+				item.imageView.setImageBitmap(null);
+
+			if (item.image != null)
+			{
+				item.image.recycle();
+				item.image = null;
+			}
+
+			item.uri = uri;
+
+			Context context = getActivity();
+
+			InputStream inputStream = null;
+			try
+			{
+				ContentResolver cr = context.getContentResolver();
+				inputStream = cr.openInputStream(uri);
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inSampleSize = 4;
+				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+
+				if (bitmap != null)
+				{
+					item.image = bitmap;
+					item.imageView.setImageBitmap(bitmap);
+				}
+			}
+			catch (FileNotFoundException e)
+			{
+			}
+			catch (IOException e)
+			{
+			}
+			finally
+			{
+				try
+				{
+					if (inputStream != null)
+						inputStream.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
 		}
 	}
 
@@ -289,13 +453,13 @@ public class AddPhotoFragment extends Fragment
 						{
 							e.printStackTrace();
 						}
-						(getActivity()).startActivityForResult(camIntent, ACTION_CAMERA);
+						startActivityForResult(camIntent, ACTION_CAMERA);
 						break;
 					case 1:
 						Intent galIntent = new Intent();
 						galIntent.setType("image/*");
 						galIntent.setAction(Intent.ACTION_GET_CONTENT);
-						(getActivity()).startActivityForResult(galIntent, ACTION_GALLERY);
+						startActivityForResult(galIntent, ACTION_GALLERY);
 						break;
 				}
 			}
@@ -332,6 +496,7 @@ public class AddPhotoFragment extends Fragment
 	{
 		public Bitmap image;
 		public Uri uri;
+		public ImageView imageView;
 	}
 
 }

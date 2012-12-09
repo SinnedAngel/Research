@@ -7,17 +7,34 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="16" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
+        android:name="com.example.research.ResearchApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" android:name="ResearchApplication">
+        android:theme="@style/AppTheme" >
         <activity
             android:name="com.example.research.MainActivity"
             android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.example.research.CreateAdsActivity2"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+
+        <provider
+            android:name="com.example.research.data.DataProvider"
+            android:authorities="com.example.research.data.DataProvider"
+            android:exported="false" >
+        </provider>
+
+        <activity
+            android:name="com.example.research.CreateAdsActivity"
+            android:label="@string/title_activity_create_ads" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

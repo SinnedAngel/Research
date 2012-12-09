@@ -42,6 +42,7 @@ public class AddPhotoView extends LinearLayout
 	private int mHalfPadding = 2;
 
 	private int mMaxColumn = 3;
+	private int mMaxItemCount = 0;
 
 	private boolean mIsUseSize = false;
 
@@ -81,6 +82,11 @@ public class AddPhotoView extends LinearLayout
 		mIsUseSize = true;
 	}
 
+	public void setMaxItemCount(int maxItemCount)
+	{
+		this.mMaxItemCount = maxItemCount;
+	}
+
 	public AddPhotoView(Context context)
 	{
 		super(context);
@@ -115,6 +121,7 @@ public class AddPhotoView extends LinearLayout
 			mItemSize = (int) a.getDimension(R.styleable.AddPhotoView_itemSize, 80);
 			mMaxColumn = a.getInteger(R.styleable.AddPhotoView_maxColumns, 3);
 			mPicturePath = a.getString(R.styleable.AddPhotoView_picturePath);
+			mMaxItemCount = a.getInteger(R.styleable.AddPhotoView_maxItemCount, 0);
 
 			a.recycle();
 		}
@@ -242,6 +249,12 @@ public class AddPhotoView extends LinearLayout
 		}
 	}
 
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+	{
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	}
+
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		if (requestCode == ACTION_CAMERA)
@@ -295,7 +308,9 @@ public class AddPhotoView extends LinearLayout
 			if (count > 0)
 				mCurrentContainer.addView(imageView, count - 1);
 
-			if (count + 1 > mMaxColumn)
+			if (mMaxItemCount > 0 && mImageList.size() >= mMaxItemCount)
+				mButtonAddPhoto.setVisibility(GONE);
+			else if (count + 1 > mMaxColumn)
 			{
 				mCurrentContainer.removeView(mButtonAddPhoto);
 
