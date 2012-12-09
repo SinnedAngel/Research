@@ -212,6 +212,7 @@ public class AddPhotoView extends LinearLayout
 		// int padding = mPadding / 2;
 		//
 		// mCurrentContainer.setPadding(padding, padding, padding, padding);
+		mContainerParams.leftMargin = mHalfPadding;
 
 		super.onLayout(changed, l, t, r, b);
 
