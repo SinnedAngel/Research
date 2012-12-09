@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import com.example.research.AddPhotoView.PictureItem;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -13,48 +15,51 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Images.Media;
+import android.support.v4.app.Fragment;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 
-public class AddPhotoView extends LinearLayout
+public class AddPhotoFragment extends Fragment
 {
-	private Context mContext;
+	private LinearLayout mMainLayout;
+	private ImageButton mButtonAddPhoto;
+	private LinearLayout mCurrentContainer;
 
 	private LayoutParams mContainerParams;
 	private LayoutParams mItemParams;
-
-	private ImageButton mButtonAddPhoto;
-
-	private LinearLayout mCurrentContainer;
 
 	private int mItemSize = 80;
 	private int mPadding = 5;
 	private int mHalfPadding = 2;
 
-	private int mMaxColumn = 3;
+	private int mMaxColumns = 3;
 
 	private boolean mIsUseSize = false;
 
 	private static final int ACTION_CAMERA = 1;
 	private static final int ACTION_GALLERY = 2;
 
-	private Uri mImageCaptureUri;
-
+	private ArrayList<String> mUriList = new ArrayList<String>();
 	private ArrayList<PictureItem> mImageList = new ArrayList<PictureItem>();
 
-	private ArrayList<String> mUriList = new ArrayList<String>();
-
 	private String mPicturePath;
+
+	private Uri mImageCaptureUri;
 
 	public PictureItem[] getImageList()
 	{
@@ -71,7 +76,7 @@ public class AddPhotoView extends LinearLayout
 
 	public void setMaxColumn(int maxColumn)
 	{
-		this.mMaxColumn = maxColumn;
+		this.mMaxColumns = maxColumn;
 		mIsUseSize = false;
 	}
 
@@ -81,43 +86,16 @@ public class AddPhotoView extends LinearLayout
 		mIsUseSize = true;
 	}
 
-	public AddPhotoView(Context context)
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		super(context);
-		initialize(context, null);
-	}
+		View v = inflater.inflate(R.layout.add_photo_fragment, container, false);
 
-	public AddPhotoView(Context context, AttributeSet attrs)
-	{
-		super(context, attrs);
-		initialize(context, attrs);
-	}
-
-	public AddPhotoView(Context context, AttributeSet attrs, int defStyle)
-	{
-		super(context, attrs, defStyle);
-		initialize(context, attrs);
-	}
-
-	private void initialize(Context context, AttributeSet attrs)
-	{
-		mContext = context;
+		mMainLayout = (LinearLayout) v.findViewById(R.id.layoutMain);
 
 		mContainerParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
-		setOrientation(VERTICAL);
-
-		if (attrs != null)
-		{
-			final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AddPhotoView);
-
-			mIsUseSize = a.getBoolean(R.styleable.AddPhotoView_isUseSize, false);
-			mItemSize = (int) a.getDimension(R.styleable.AddPhotoView_itemSize, 80);
-			mMaxColumn = a.getInteger(R.styleable.AddPhotoView_maxColumns, 3);
-			mPicturePath = a.getString(R.styleable.AddPhotoView_picturePath);
-
-			a.recycle();
-		}
+		Activity activity = getActivity();
 
 		mItemParams = new LayoutParams(mItemSize, mItemSize);
 		// mItemParams.rightMargin = mPadding;
@@ -125,22 +103,22 @@ public class AddPhotoView extends LinearLayout
 		mItemParams.leftMargin = mHalfPadding;
 		mItemParams.rightMargin = mHalfPadding;
 
-		mCurrentContainer = new LinearLayout(context);
+		mCurrentContainer = new LinearLayout(activity);
 		mCurrentContainer.setLayoutParams(mContainerParams);
 		mCurrentContainer.setOrientation(LinearLayout.HORIZONTAL);
 
 		// int padding = mPadding / 2;
 		//
 		// mCurrentContainer.setPadding(padding, padding, padding, padding);
-		addView(mCurrentContainer);
+		mMainLayout.addView(mCurrentContainer);
 
-		mButtonAddPhoto = new ImageButton(context);
+		mButtonAddPhoto = new ImageButton(activity);
 		mButtonAddPhoto.setBackgroundResource(R.drawable.upload_foto_bg);
 		mButtonAddPhoto.setImageResource(R.drawable.thumbnail_upload);
 		mButtonAddPhoto.setLayoutParams(mItemParams);
 		mCurrentContainer.addView(mButtonAddPhoto);
 
-		mButtonAddPhoto.setOnClickListener(new OnClickListener()
+		mButtonAddPhoto.setOnClickListener(new ImageButton.OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
@@ -149,11 +127,135 @@ public class AddPhotoView extends LinearLayout
 			}
 		});
 
+		mMainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
+		{
+			@Override
+			public void onGlobalLayout()
+			{
+				View v = getView();
+
+				if (v != null)
+				{
+					int width = v.getWidth();
+					if (mIsUseSize)
+						mMaxColumns = (width / mItemSize) - 1;
+					else
+						mItemSize = width / (mMaxColumns + 1);
+					mPadding = mItemSize / mMaxColumns;
+					mHalfPadding = mPadding / 2;
+					mItemParams.width = mItemSize;
+					mItemParams.height = mItemSize;
+					// mItemParams.rightMargin = mPadding;
+					mItemParams.topMargin = mPadding;
+					mItemParams.leftMargin = mHalfPadding;
+					mItemParams.rightMargin = mHalfPadding;
+					// mButtonAddPhoto.setLayoutParams(mItemParams);
+					// int padding = mPadding / 2;
+					//
+					// mCurrentContainer.setPadding(padding, padding, padding,
+					// padding);
+					mContainerParams.leftMargin = mHalfPadding;
+					mContainerParams.bottomMargin = mPadding;
+					if (mUriList.size() > 0)
+					{
+						for (String string : mUriList)
+						{
+							Uri uri = Uri.parse(string);
+							addImage(uri);
+						}
+
+						mUriList.clear();
+					}
+				}
+			}
+		});
+
+		return v;
+	}
+
+	@Override
+	public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState)
+	{
+		super.onInflate(activity, attrs, savedInstanceState);
+
+		final TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.AddPhotoView);
+
+		mIsUseSize = a.getBoolean(R.styleable.AddPhotoView_isUseSize, false);
+		mItemSize = (int) a.getDimension(R.styleable.AddPhotoView_itemSize, 80);
+		mMaxColumns = a.getInteger(R.styleable.AddPhotoView_maxColumns, 3);
+		mPicturePath = a.getString(R.styleable.AddPhotoView_picturePath);
+
+		a.recycle();
+	}
+
+	private void addImage(Uri uri)
+	{
+		if (uri == null)
+			return;
+
+		Context context = getActivity();
+
+		InputStream inputStream = null;
+		try
+		{
+			ContentResolver cr = context.getContentResolver();
+			// Bitmap bitmap = Media.getBitmap(cr, uri);
+			inputStream = cr.openInputStream(uri);
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inSampleSize = 4;
+			Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+
+			PictureItem item = new PictureItem();
+			item.image = bitmap;
+			item.uri = uri;
+
+			mImageList.add(item);
+
+			ImageView imageView = new ImageView(context);
+			imageView.setImageBitmap(bitmap);
+			imageView.setBackgroundResource(R.drawable.upload_foto_bg);
+			imageView.setLayoutParams(mItemParams);
+
+			int count = mCurrentContainer.getChildCount();
+			if (count > 0)
+				mCurrentContainer.addView(imageView, count - 1);
+
+			if (count + 1 > mMaxColumns)
+			{
+				mCurrentContainer.removeView(mButtonAddPhoto);
+
+				mCurrentContainer = new LinearLayout(context);
+				mCurrentContainer.setLayoutParams(mContainerParams);
+				mCurrentContainer.setOrientation(LinearLayout.HORIZONTAL);
+				// mCurrentContainer.setPadding(mPadding, mPadding, mPadding,
+				// mPadding);
+				mMainLayout.addView(mCurrentContainer);
+
+				mCurrentContainer.addView(mButtonAddPhoto);
+			}
+		}
+		catch (FileNotFoundException e)
+		{
+		}
+		catch (IOException e)
+		{
+		}
+		finally
+		{
+			// try
+			// {
+			// if (inputStream != null)
+			// inputStream.close();
+			// }
+			// catch (IOException e)
+			// {
+			// }
+		}
 	}
 
 	private void showPictureSelection()
 	{
-		AlertDialog.Builder adb = new AlertDialog.Builder(mContext);
+		AlertDialog.Builder adb = new AlertDialog.Builder(getActivity());
 		adb.setTitle("Pick a Source");
 		adb.setItems(new String[] { "Camera", "Gallery" }, new DialogInterface.OnClickListener()
 		{
@@ -187,145 +289,18 @@ public class AddPhotoView extends LinearLayout
 						{
 							e.printStackTrace();
 						}
-						((Activity) mContext).startActivityForResult(camIntent, ACTION_CAMERA);
+						(getActivity()).startActivityForResult(camIntent, ACTION_CAMERA);
 						break;
 					case 1:
 						Intent galIntent = new Intent();
 						galIntent.setType("image/*");
 						galIntent.setAction(Intent.ACTION_GET_CONTENT);
-						((Activity) mContext).startActivityForResult(galIntent, ACTION_GALLERY);
+						(getActivity()).startActivityForResult(galIntent, ACTION_GALLERY);
 						break;
 				}
 			}
 		});
 		adb.show();
-	}
-
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b)
-	{
-		int width = r - l;
-
-		if (mIsUseSize)
-			mMaxColumn = (width / mItemSize) - 1;
-		else
-			mItemSize = width / (mMaxColumn + 1);
-
-		mPadding = mItemSize / mMaxColumn;
-		mHalfPadding = mPadding / 2;
-
-		mItemParams.width = mItemSize;
-		mItemParams.height = mItemSize;
-		// mItemParams.rightMargin = mPadding;
-		mItemParams.topMargin = mPadding;
-		mItemParams.leftMargin = mHalfPadding;
-		mItemParams.rightMargin = mHalfPadding;
-		// mButtonAddPhoto.setLayoutParams(mItemParams);
-
-		// int padding = mPadding / 2;
-		//
-		// mCurrentContainer.setPadding(padding, padding, padding, padding);
-		mContainerParams.leftMargin = mHalfPadding;
-		mContainerParams.bottomMargin = mPadding;
-
-		super.onLayout(changed, l, t, r, b);
-
-		if (mUriList.size() > 0)
-		{
-			for (String string : mUriList)
-			{
-				Uri uri = Uri.parse(string);
-				addImage(uri);
-			}
-
-			mUriList.clear();
-		}
-	}
-
-	public void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
-		if (requestCode == ACTION_CAMERA)
-		{
-			if (resultCode == Activity.RESULT_OK)
-			{
-				Uri uri = mImageCaptureUri;
-				addImage(uri);
-			}
-		}
-		if (requestCode == ACTION_GALLERY)
-		{
-			if (resultCode == Activity.RESULT_OK)
-			{
-				if (data != null)
-				{
-					Uri uri = data.getData();
-					addImage(uri);
-				}
-			}
-		}
-	}
-
-	private void addImage(Uri uri)
-	{
-		if (uri == null)
-			return;
-
-		InputStream inputStream = null;
-		try
-		{
-			ContentResolver cr = mContext.getContentResolver();
-			// Bitmap bitmap = Media.getBitmap(cr, uri);
-			inputStream = cr.openInputStream(uri);
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 4;
-			Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-
-			PictureItem item = new PictureItem();
-			item.image = bitmap;
-			item.uri = uri;
-
-			mImageList.add(item);
-
-			ImageView imageView = new ImageView(mContext);
-			imageView.setImageBitmap(bitmap);
-			imageView.setBackgroundResource(R.drawable.upload_foto_bg);
-			imageView.setLayoutParams(mItemParams);
-
-			int count = mCurrentContainer.getChildCount();
-			if (count > 0)
-				mCurrentContainer.addView(imageView, count - 1);
-
-			if (count + 1 > mMaxColumn)
-			{
-				mCurrentContainer.removeView(mButtonAddPhoto);
-
-				mCurrentContainer = new LinearLayout(mContext);
-				mCurrentContainer.setLayoutParams(mContainerParams);
-				mCurrentContainer.setOrientation(LinearLayout.HORIZONTAL);
-				// mCurrentContainer.setPadding(mPadding, mPadding, mPadding,
-				// mPadding);
-				addView(mCurrentContainer);
-
-				mCurrentContainer.addView(mButtonAddPhoto);
-			}
-		}
-		catch (FileNotFoundException e)
-		{
-		}
-		catch (IOException e)
-		{
-		}
-		finally
-		{
-			// try
-			// {
-			// if (inputStream != null)
-			// inputStream.close();
-			// }
-			// catch (IOException e)
-			// {
-			// }
-		}
 	}
 
 	public void addImages(String... uriList)
@@ -358,4 +333,5 @@ public class AddPhotoView extends LinearLayout
 		public Bitmap image;
 		public Uri uri;
 	}
+
 }

@@ -1,0 +1,10 @@
+<resources>
+
+    <declare-styleable name="AddPhotoView">
+        <attr name="isUseSize" format="boolean" />
+        <attr name="itemSize" format="dimension" />
+        <attr name="maxColumns" format="integer" />
+        <attr name="picturePath" format="string" />
+    </declare-styleable>
+
+</resources>

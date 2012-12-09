@@ -1,15 +1,11 @@
 package com.example.research;
 
-import java.util.ArrayList;
-
-import com.example.research.AddPhotoView.PictureItem;
-
 import android.os.Bundle;
-import android.app.Activity;
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 
-public class MainActivity extends Activity
+public class MainActivity extends FragmentActivity
 {
 	private AddPhotoView mAddPhotoView;
 
@@ -20,8 +16,8 @@ public class MainActivity extends Activity
 		setContentView(R.layout.activity_main);
 
 		mAddPhotoView = (AddPhotoView) findViewById(R.id.addPhotoView1);
-		mAddPhotoView.setPicturePath("TestPhoto");
-		mAddPhotoView.setImageSize(100);
+		// mAddPhotoView.setPicturePath("TestPhoto");
+		// mAddPhotoView.setImageSize(100);
 	}
 
 	@Override

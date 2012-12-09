@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res/com.example.research"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity" >
@@ -8,12 +9,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <com.example.research.AddPhotoView
-            android:id="@+id/addPhotoView1"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true" >
-        </com.example.research.AddPhotoView>
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <fragment
+                android:id="@+id/fragment1"
+                android:name="com.example.research.AddPhotoFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:isUseSize="true"
+                app:itemSize="100px"
+                app:picturePath="TestPhoto" />
+
+            <com.example.research.AddPhotoView
+                android:id="@+id/addPhotoView1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:isUseSize="true"
+                app:itemSize="100px"
+                app:picturePath="TestPhoto" >
+            </com.example.research.AddPhotoView>
+        </LinearLayout>
     </ScrollView>
 
 </RelativeLayout>
